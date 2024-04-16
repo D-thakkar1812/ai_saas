@@ -16,6 +16,8 @@ import axios from "axios";
 import Empty from "@/components/Empty";
 import Loader from "@/components/Loader";
 
+import { useProModal } from "@/hooks/use-promodal-ui";
+import {toast} from "react-hot-toast";
 
 
 
@@ -29,7 +31,7 @@ const video = ()=>{
 
     const router = useRouter();
     const[music,setMusic] = useState<string>();
-
+    const proModal = useProModal();
     const isLoading = form.formState.isSubmitting;
     const onSubmit = async (values:z.infer <typeof formSchema>)=>{
         try{
@@ -41,7 +43,11 @@ const video = ()=>{
             form.reset();
         }
         catch(err:any){
-            console.log(err);
+            if(err?.response?.status==403){
+                proModal.onOpen();
+            }else{
+                toast.error("OOPs Something goes wrong");
+            }
         }
         finally{
             router.refresh();

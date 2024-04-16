@@ -5,7 +5,7 @@ import Replicate from "replicate";
 
 
 import { increaseApiLimit,checkApiLimit } from "@/lib/api-limit";
-
+import { subscriptionCheck } from "@/lib/subscription";
 
 const replicate = new Replicate({
   auth: process.env.Replicate_AI_API_KEY!,
@@ -31,7 +31,8 @@ export async function POST(
     }
 
     const freeTrial = await checkApiLimit();
-    if(freeTrial !== undefined && freeTrial == false) {
+    const isMember = await subscriptionCheck();
+    if(freeTrial !== undefined && freeTrial == false && isMember!==undefined && isMember==false ) {
       return new NextResponse("Free trials are done,please check our subscription plans", { status: 403 });
     }
     
@@ -46,7 +47,9 @@ export async function POST(
     );
 
     
-    await increaseApiLimit();
+    if(isMember==false){
+      await increaseApiLimit();
+    }
 
     return NextResponse.json(response);
   } catch (error) {

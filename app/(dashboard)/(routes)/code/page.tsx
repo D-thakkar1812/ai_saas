@@ -5,7 +5,7 @@ import { Form ,FormField, FormItem,FormControl} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { MessageSquare} from "lucide-react";
+import { Code, Divide, MessageSquare} from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { formSchema } from "./constants";
@@ -20,14 +20,14 @@ import UserAvatar from "@/components/UserAvatar";
 import BotAvatar from "@/components/BotAvatar";
 import { useProModal } from "@/hooks/use-promodal-ui";
 import {toast} from "react-hot-toast";
-
+import ReactMarkdown from "react-markdown";
 
 type ChatCompletionRequestMessage = {
     role: string;
     content: string;
 };
 
-const Conversation = ()=>{
+const CodePage = ()=>{
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues:{
@@ -47,7 +47,7 @@ const Conversation = ()=>{
                 content:values.prompt
             }
             const newMessages = [...messages, userMessage];
-            const response= await axios.post("/api/conversation",{
+            const response= await axios.post("/api/code",{
                 messages:newMessages,
             })
             setMessage((current) => [...current, userMessage, response.data]);
@@ -67,7 +67,7 @@ const Conversation = ()=>{
     return(
         <div>
             
-            <Heading title="Conversation" description="Communicate to our Intelligent conversation model" icon={MessageSquare} iconColor="text-violet-500" bgColor="bg-violet-500/10"></Heading>
+            <Heading title="Code" description="Generate Code through our Intelligent Model" icon={Code} iconColor="text-green-800" bgColor="bg-green-800/10"></Heading>
             <div className="px-4 lg:px-8 ">
                 <div>
                     <Form  {...form}>
@@ -93,7 +93,7 @@ const Conversation = ()=>{
                                             <Input
                                                 className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                                                 disabled={isLoading}
-                                                placeholder="How do I calculate the radius of a circle?"
+                                                placeholder="Generate code for kadane algorithm"
                                                 
 
                                                 {...field}
@@ -126,7 +126,20 @@ const Conversation = ()=>{
                                 messages.map((message)=>(
                                     <div key={message.content} className={cn("p-8 w-full flex items-start gap-x-8 rounded-lg",message.role === "user"? "bg-white border  border-black/10 ": "bg-muted")}>
                                         {message.role === "user"? <UserAvatar/> : <BotAvatar />}
-                                        {message.content}
+                                        <ReactMarkdown 
+                                            components={{
+                                                pre:({node,...props}) =>(
+                                                    <div className="overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg">
+                                                        <pre {...props} ></pre>
+                                                    </div>
+                                                ),
+                                                code:({node,...props})=>(
+                                                    <code className="bg-black rounded-lg p-1" {...props}/>
+                                                )
+                                            }}  
+                                        >
+                                            {message.content || ""}
+                                        </ReactMarkdown>
                                     </div>
                                 ))
                             }
@@ -138,4 +151,4 @@ const Conversation = ()=>{
     );
 }
 
-export default Conversation;
+export default CodePage;

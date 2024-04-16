@@ -21,6 +21,8 @@ import BotAvatar from "@/components/BotAvatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardFooter } from "@/components/ui/card";
 import Image from "next/image";
+import { useProModal } from "@/hooks/use-promodal-ui";
+import {toast} from "react-hot-toast"
 
 
 
@@ -37,6 +39,7 @@ const Picture = ()=>{
 
     const router = useRouter();
     const [images,setImages] =useState<string[]>([]);
+    const proModal = useProModal();
 
     const isLoading = form.formState.isSubmitting;
     const onSubmit = async (values:z.infer <typeof formSchema>)=>{
@@ -49,7 +52,11 @@ const Picture = ()=>{
             form.reset();
         }
         catch(err:any){
-            console.log(err);
+            if(err?.response?.status == 403){
+                proModal.onOpen();
+            }else{
+                toast.error("OOPs Something goes wrong");
+            }
         }
         finally{
             router.refresh();
